@@ -98,8 +98,8 @@ public class NetworkPageExporter extends FileExporter {
 
         // Fixes refreshingJsonRequest ignoring old data of export
         String html = StringUtils.replaceEach(page.toHtml(),
-                new String[]{"loadPlayersOnlineGraph, 'network-overview', true);"},
-                new String[]{"loadPlayersOnlineGraph, 'network-overview');"});
+                new String[]{"loadPlayersOnlineGraph, 'network-overview', true);", "&middot; Performance"},
+                new String[]{"loadPlayersOnlineGraph, 'network-overview');", "&middot; Performance (Unavailable with Export)"});
 
         export(to, exportPaths.resolveExportPaths(html));
     }
@@ -177,8 +177,6 @@ public class NetworkPageExporter extends FileExporter {
                 "./img/Flaticon_circle.png",
                 "./css/sb-admin-2.css",
                 "./css/style.css",
-                "./vendor/jquery/jquery.min.js",
-                "./vendor/bootstrap/js/bootstrap.bundle.min.js",
                 "./vendor/datatables/datatables.min.js",
                 "./vendor/datatables/datatables.min.css",
                 "./vendor/highcharts/highstock.js",
@@ -187,6 +185,7 @@ public class NetworkPageExporter extends FileExporter {
                 "./vendor/highcharts/drilldown.js",
                 "./vendor/highcharts/highcharts-more.js",
                 "./vendor/highcharts/no-data-to-display.js",
+                "./vendor/masonry/masonry.pkgd.min.js",
                 "./vendor/fontawesome-free/css/all.min.css",
                 "./vendor/fontawesome-free/webfonts/fa-brands-400.eot",
                 "./vendor/fontawesome-free/webfonts/fa-brands-400.ttf",

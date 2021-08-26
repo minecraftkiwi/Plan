@@ -1,22 +1,22 @@
 dependencies {
-    compile "net.playeranalytics:platform-abstraction-layer-api:$palVersion"
-    compile project(":api")
+    implementation "net.playeranalytics:platform-abstraction-layer-api:$palVersion"
+    implementation project(":api")
     compileOnly project(":extensions")
-    compile project(path: ":extensions", configuration: 'shadow')
-    compile "org.apache.commons:commons-text:$commonsTextVersion"
-    compile "org.apache.commons:commons-compress:$commonsCompressVersion"
-    compile "com.github.ben-manes.caffeine:caffeine:$caffeineVersion"
-    implementation "com.h2database:h2:$h2Version"
-    implementation "mysql:mysql-connector-java:$mysqlVersion"
-    implementation "org.xerial:sqlite-jdbc:$sqliteVersion"
-    compile "com.zaxxer:HikariCP:$hikariVersion"
-    compile "org.slf4j:slf4j-nop:$slf4jVersion"
-    compile "org.slf4j:slf4j-api:$slf4jVersion"
-    compile "com.maxmind.geoip2:geoip2:$geoIpVersion"
-    compile "com.google.code.gson:gson:$gsonVersion"
+    implementation project(path: ":extensions", configuration: 'shadow')
+    implementation "org.apache.commons:commons-text:$commonsTextVersion"
+    implementation "org.apache.commons:commons-compress:$commonsCompressVersion"
+    implementation "com.github.ben-manes.caffeine:caffeine:$caffeineVersion"
+    compileOnly "mysql:mysql-connector-java:$mysqlVersion"
+    compileOnly "org.xerial:sqlite-jdbc:$sqliteVersion"
+    implementation "com.zaxxer:HikariCP:$hikariVersion"
+    implementation "org.slf4j:slf4j-nop:$slf4jVersion"
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "com.maxmind.geoip2:geoip2:$geoIpVersion"
+    implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation slimjar("1.2.5")
 
-    testCompile project(":api")
-    testCompile "com.google.code.gson:gson:$gsonVersion"
+    testImplementation project(":api")
+    testImplementation "com.google.code.gson:gson:$gsonVersion"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -25,18 +25,43 @@ task updateVersion(type: Copy) {
         include 'plugin.yml'
         include 'bungee.yml'
         include 'nukkit.yml'
+        include 'fabric.mod.json'
     }
     into 'build/sources/resources/'
     filter(ReplaceTokens, tokens: [version: '' + project.ext.fullVersion])
 }
+
+task determineWebAssetModifications {
+    doLast {
+        mkdir "build/resources/main/assets/plan"
+        def versionFile = file("build/resources/main/assets/plan/WebAssetVersion.yml")
+        versionFile.text = "" // Clear previous build
+        ConfigurableFileTree tree = fileTree(dir: 'src/main/resources/assets/plan/web')
+        tree.forEach { File f ->
+            def gitModified = new ByteArrayOutputStream()
+            exec {
+                commandLine 'git', 'log', '-1', '--pretty=%ct', f.toString()
+                standardOutput = gitModified
+            }
+            // git returns UNIX time in seconds, but most things in Java use UNIX time in milliseconds
+            def modified = Long.parseLong(gitModified.toString().strip()) * 1000
+            def relativePath = tree.getDir().toPath().relativize(f.toPath()) // File path relative to the tree
+            versionFile.text += String.format( // writing YAML as raw text probably isn't the best idea
+                    "%s: %s\n", relativePath.toString().replace('.', ','), modified
+            )
+        }
+    }
+}
+
 processResources {
+    dependsOn determineWebAssetModifications
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     dependsOn updateVersion
     from 'build/sources/resources'
 }
 
 shadowJar {
     dependsOn processResources
-    configurations = [project.configurations.compile]
 
     // Exclude these files
     exclude "**/*.svg"
@@ -48,13 +73,15 @@ shadowJar {
     exclude 'org/apache/http/**/*' // Unnecessary http client depended on by geolite2 implementation
     exclude 'mozilla/**/*'
 
+    // Exclude unnecessary SQLite drivers
+    exclude '**/Linux/android-arm/libsqlitejdbc.so'
+    exclude '**/DragonFlyBSD/**/libsqlitejdbc.so'
+
     relocate 'com.maxmind', 'plan.com.maxmind'
     relocate 'com.fasterxml', 'plan.com.fasterxml'
     relocate 'com.zaxxer', 'plan.com.zaxxer'
-    relocate 'com.google.protobuf', 'plan.com.google.protobuf'
     relocate 'com.google.gson', 'plan.com.google.gson'
     relocate 'com.google.errorprone', 'plan.com.google.errorprone'
-    relocate 'org.h2', 'plan.org.h2'
     relocate 'org.bstats', 'plan.org.bstats'
     relocate 'org.slf4j', 'plan.org.slf4j'
 

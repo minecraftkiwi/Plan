@@ -18,6 +18,8 @@ package com.djrapitops.plan.modules.nukkit;
 
 import cn.nukkit.level.Level;
 import com.djrapitops.plan.TaskSystem;
+import com.djrapitops.plan.delivery.web.ResourceWriteTask;
+import com.djrapitops.plan.delivery.web.WebAssetVersionCheckTask;
 import com.djrapitops.plan.delivery.webserver.cache.JSONFileStorage;
 import com.djrapitops.plan.extension.ExtensionServerDataUpdater;
 import com.djrapitops.plan.gathering.ShutdownDataPreservation;
@@ -28,6 +30,7 @@ import com.djrapitops.plan.gathering.timed.SystemUsageBuffer;
 import com.djrapitops.plan.settings.upkeep.ConfigStoreTask;
 import com.djrapitops.plan.storage.upkeep.DBCleanTask;
 import com.djrapitops.plan.storage.upkeep.LogsFolderCleanTask;
+import com.djrapitops.plan.storage.upkeep.OldDependencyCacheDeletionTask;
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoSet;
@@ -78,4 +81,16 @@ public interface NukkitTaskModule {
     @Binds
     @IntoSet
     TaskSystem.Task bindShutdownDataPreservation(ShutdownDataPreservation dataPreservation);
+
+    @Binds
+    @IntoSet
+    TaskSystem.Task bindOldDependencyCacheDeletion(OldDependencyCacheDeletionTask deletionTask);
+
+    @Binds
+    @IntoSet
+    TaskSystem.Task bindResourceWriteTask(ResourceWriteTask resourceWriteTask);
+
+    @Binds
+    @IntoSet
+    TaskSystem.Task bindWebAssetVersionCheckTask(WebAssetVersionCheckTask webAssetVersionCheckTask);
 }

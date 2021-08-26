@@ -1,8 +1,8 @@
-const trend_up_good = "<span class=\"badge badge-success\"><i class=\"fa fa-caret-up\"></i> ";
-const trend_up_bad = "<span class=\"badge badge-danger\"><i class=\"fa fa-caret-up\"></i> ";
-const trend_down_bad = "<span class=\"badge badge-danger\"><i class=\"fa fa-caret-down\"></i> ";
-const trend_down_good = "<span class=\"badge badge-success\"><i class=\"fa fa-caret-down\"></i> ";
-const trend_same = "<span class=\"badge badge-warning\"><i class=\"fa fa-caret-right\"></i> ";
+const trend_up_good = "<span class=\"badge bg-success\"><i class=\"fa fa-caret-up\"></i> ";
+const trend_up_bad = "<span class=\"badge bg-danger\"><i class=\"fa fa-caret-up\"></i> ";
+const trend_down_bad = "<span class=\"badge bg-danger\"><i class=\"fa fa-caret-down\"></i> ";
+const trend_down_good = "<span class=\"badge bg-success\"><i class=\"fa fa-caret-down\"></i> ";
+const trend_same = "<span class=\"badge bg-warning\"><i class=\"fa fa-caret-right\"></i> ";
 
 const trend_end = "</span>";
 
@@ -47,6 +47,7 @@ function displayError(element, error) {
 }
 
 /* This function loads Server Overview tab */
+// Lowercase due to locale translation: Server
 function loadserverOverviewValues(json, error) {
     const tab = document.getElementById('server-overview');
 
@@ -73,6 +74,7 @@ function loadserverOverviewValues(json, error) {
     data = json.numbers;
     element = tab.querySelector('#data_numbers');
 
+    element.querySelector('#data_current_uptime').innerText = data.current_uptime;
     element.querySelector('#data_total').innerText = data.total_players;
     element.querySelector('#data_regular').innerText = data.regular_players;
     element.querySelector('#data_online').innerText = data.online_players;
@@ -368,7 +370,7 @@ async function loadOptimizedPerformanceGraph(json, error) {
                 value: json.zones.diskThresholdMed,
                 color: json.colors.low
             }, {
-                value: json.zones.tpsThresholdHigh,
+                value: json.zones.diskThresholdHigh,
                 color: json.colors.med
             }, {
                 value: Number.MAX_VALUE,
